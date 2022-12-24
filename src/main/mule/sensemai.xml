@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="f5f0fdfe-8c0e-4a04-90c2-ab0bff7bab85" >
+		<email:smtp-connection host="elabbasysoukaina@gmail.com" />
+	</email:smtp-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="9447b9c3-869b-4bcb-a16e-094bc45d3967" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<email:smtp-config name="Email_SMTP1" doc:name="Email SMTP" doc:id="77632013-a0f1-4f0a-b3ab-dfd2a33320ae" >
+		<email:smtp-connection host="smtp.gmail.com" port="587" user="senderemail@gmail.com" password="yourpassword" connectionTimeout="15" readTimeout="15" writeTimeout="15">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<flow name="sensemaiFlow" doc:id="cc3a2261-dd67-49f4-9fcf-248eae31d56d" >
+		<http:listener doc:name="Listener" doc:id="230454f7-29f9-4b05-a822-b2e8c157c8d9" config-ref="HTTP_Listener_config" path="/sendEmail" allowedMethods="POST"/>
+		<email:send doc:name="Send" doc:id="859f5460-9466-4094-bac4-744aba92b9d4" config-ref="Email_SMTP1" fromAddress="senderemail@gmail.com" subject="Transfer Code" toAddresses="#[payload.email]">
+			<email:body contentType="text/plain" encoding="UTF-8" >
+				<email:content ><![CDATA[#[payload.content]]]></email:content>
+			</email:body>
+		</email:send>
+		<ee:transform doc:name="Transform Message" doc:id="c150402d-cdfd-458f-abf5-1f4614f4629e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: "Email has been sent successfully..."
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="recievedemail" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-variable>
+				<ee:set-variable variableName="message" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+</mule>
